@@ -1,0 +1,17 @@
+FROM golang:1.22-alpine as builder
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+RUN go build -o /app/server /app/cmd/server
+
+EXPOSE 8005
+
+ENV CHALLENGE_DIFFICULTY=6
+ENV LISTEN_ADDR=:8005
+ENV SOCKET_READ_TIMEOUT_SEC=5
+
+ENTRYPOINT ["./server"]

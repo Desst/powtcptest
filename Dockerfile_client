@@ -1,0 +1,14 @@
+FROM golang:1.22-alpine as builder
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+
+RUN go build -o /app/client /app/cmd/client
+
+ENV SERVER_ADDR=localhost:8005
+ENV SOCKET_READ_TIMEOUT_SEC=5
+
+ENTRYPOINT ["./client"]

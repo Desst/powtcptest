@@ -1,0 +1,23 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile_server
+    ports:
+      - "8005:8005"
+    container_name: pow-server
+    environment:
+      CHALLENGE_DIFFICULTY: 7
+      LISTEN_ADDR: :8005
+      SOCKET_READ_TIMEOUT_SEC: 5
+
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile_client
+    container_name: pow-client
+    environment:
+      SERVER_ADDR: pow-server:8005
+      SOCKET_READ_TIMEOUT_SEC: 5
+    depends_on:
+      - server
