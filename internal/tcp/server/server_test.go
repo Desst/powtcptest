@@ -29,7 +29,10 @@ func TestHandleMultipleConnections(t *testing.T) {
 		conns = append(conns, conn)
 	}
 
-	time.Sleep(200 * time.Millisecond)
+	for _, conn := range conns {
+		var msg v1.Message
+		require.NoError(t, json.NewDecoder(conn).Decode(&msg))
+	}
 	err := srv.Shutdown(context.Background())
 	require.NoError(t, err)
 }
