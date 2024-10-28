@@ -29,6 +29,7 @@ func TestHandleMultipleConnections(t *testing.T) {
 		conns = append(conns, conn)
 	}
 
+	time.Sleep(200 * time.Millisecond)
 	err := srv.Shutdown(context.Background())
 	require.NoError(t, err)
 
@@ -83,13 +84,13 @@ func TestShutdownWhileConnected(t *testing.T) {
 
 	//expect newchallenge msg
 	buf := make([]byte, 1024)
-	n, err := conn.Read(buf)
+	_, err = conn.Read(buf)
 	require.NoError(t, err) // Connection should be closed during shutdown
 
 	// Trigger a server shutdown while the connection is open
 	require.NoError(t, srv.Shutdown(context.Background()))
 
-	n, err = conn.Read(buf)
+	n, err := conn.Read(buf)
 	require.Error(t, err) // Connection should be closed during shutdown
 	require.Equal(t, 0, n)
 
