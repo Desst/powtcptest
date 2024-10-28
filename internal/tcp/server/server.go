@@ -25,9 +25,7 @@ type Server struct {
 	collection        QuotesCollection
 	challengeProvider PoWChallengeProvider
 
-	connsMutex  sync.RWMutex
-	activeConns map[string]*connInfo
-	wg          sync.WaitGroup
+	wg sync.WaitGroup
 
 	shutdownChan chan struct{}
 }
@@ -45,7 +43,6 @@ func NewServer(
 		challengeDifficulty: challengeDifficulty,
 		collection:          collection,
 		challengeProvider:   challengeProvider,
-		activeConns:         make(map[string]*connInfo),
 		shutdownChan:        make(chan struct{}),
 	}
 }
@@ -108,10 +105,6 @@ func (s *Server) acceptConnections() {
 			challenge := s.challengeProvider.GenerateChallenge()
 			connInfo := newConnInfo(conn, challenge, s.challengeDifficulty)
 
-			s.connsMutex.Lock()
-			s.activeConns[conn.RemoteAddr().String()] = connInfo
-			s.connsMutex.Unlock()
-
 			log.Printf("Accepted new connection from %s", conn.RemoteAddr().String())
 			s.wg.Add(1)
 			go s.handleConnection(connInfo)
@@ -120,14 +113,9 @@ func (s *Server) acceptConnections() {
 }
 
 func (s *Server) closeConn(conn net.Conn) {
-	s.connsMutex.Lock()
-	defer s.connsMutex.Unlock()
-
 	if err := conn.Close(); err != nil {
 		log.Printf("Error closing connection: %s", err.Error())
 	}
-
-	delete(s.activeConns, conn.RemoteAddr().String())
 
 	log.Printf("Client %s disconnected", conn.RemoteAddr().String())
 }

@@ -32,8 +32,6 @@ func TestHandleMultipleConnections(t *testing.T) {
 	time.Sleep(200 * time.Millisecond)
 	err := srv.Shutdown(context.Background())
 	require.NoError(t, err)
-
-	require.Len(t, srv.activeConns, 0)
 }
 
 func TestInvalidChallenge(t *testing.T) {
